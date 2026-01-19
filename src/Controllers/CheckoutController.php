@@ -9,7 +9,6 @@ class CheckoutController
 {
     public function __construct(
         private Environment $twig,
-        private DatabaseInterface $db
     ) {}
 
     public function index()

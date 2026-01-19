@@ -2,7 +2,6 @@
 
 namespace SellNow\Controllers;
 
-use SellNow\Interface\DatabaseInterface;
 use Twig\Environment;
 
 class HomeController

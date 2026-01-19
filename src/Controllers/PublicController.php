@@ -2,22 +2,21 @@
 
 namespace SellNow\Controllers;
 
+use SellNow\Interface\DatabaseInterface;
+use Twig\Environment;
+
 class PublicController
 {
-    private $twig;
-    private $db;
-
-    public function __construct($twig, $db)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-    }
+    public function __construct(
+        private Environment $twig,
+        private DatabaseInterface $db
+    ) {}
 
     public function profile($username)
     {
         // Raw SQL to find user
         // Imperfect: Inefficient separate queries
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :u");
+        $stmt = $this->db->getConnection()->prepare("SELECT * FROM users WHERE username = :u");
         $stmt->execute(['u' => $username]);
         $user = $stmt->fetch(\PDO::FETCH_OBJ);
 

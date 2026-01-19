@@ -5,7 +5,8 @@ use SellNow\Controllers\{
     CartController,
     CheckoutController,
     HomeController,
-    ProductController
+    ProductController,
+    PublicController
 };
 
 return [
@@ -27,5 +28,7 @@ return [
     '/payment' => ['controller' => CheckoutController::class, 'method' => 'payment'],
     '/checkout/success' => ['controller' => CheckoutController::class, 'method' => 'success'],
 
+    '/{username}' => ['controller' => PublicController::class, 'method' => 'profile'],
+    '/{username}/products' => ['controller' => PublicController::class, 'method' => 'redirectToProfile'],
 
 ];
