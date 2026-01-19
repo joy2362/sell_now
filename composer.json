@@ -6,15 +6,16 @@
         "php": ">=8.0",
         "twig/twig": "^3.0",
         "vlucas/phpdotenv": "^5.5",
-        "php-di/php-di": "^7.1"
+        "php-di/php-di": "^7.1",
+        "robmorgan/phinx": "*"
     },
     "autoload": {
         "psr-4": {
-            "SellNow\\": "src/",
-            "files": [
-                "src/Helpers/Helper.php"
-            ]
-        }
+            "SellNow\\": "src/"
+        },
+        "files": [
+            "src/Helpers/Helper.php"
+        ]
     },
     "authors": [
         {
