@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'default' => $_ENV['DB_CONNECTION'] ?? '    mysql',
+    'default' => $_ENV['DB_CONNECTION'] ?? 'mysql',
 
     "connections" => [
         'sqlite' => [
-            'database' => __DIR__ . '',
+            'path'   => $_ENV['DB_SQLITE_PATH'] ?? __DIR__ . '/../database/database.sqlite',
         ],
         'mysql' => [
             'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',

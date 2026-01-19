@@ -10,7 +10,10 @@
     },
     "autoload": {
         "psr-4": {
-            "SellNow\\": "src/"
+            "SellNow\\": "src/",
+            "files": [
+                "src/Helpers/Helper.php"
+            ]
         }
     },
     "authors": [

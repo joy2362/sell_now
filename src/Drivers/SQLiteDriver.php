@@ -1,6 +1,6 @@
 <?php
 
-namespace SellNow\Config;
+namespace SellNow\Drivers;
 
 use PDO;
 use PDOException;

@@ -2,9 +2,13 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use SellNow\Config\Database;
-use Twig\Loader\FilesystemLoader;
+use DI\ContainerBuilder;
 use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use SellNow\Controllers\AuthController;
+use SellNow\Drivers\MySQLDriver;
+use SellNow\Drivers\SQLiteDriver;
+use SellNow\Interface\DatabaseInterface;
 
 session_start();
 
@@ -12,34 +16,54 @@ session_start();
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
-// Basic Twig Setup (Global-ish)
-$loader = new FilesystemLoader(__DIR__ . '/../templates');
-$twig = new Environment($loader, ['debug' => true]);
-$twig->addGlobal('session', $_SESSION);
+$dbConfig = require __DIR__ . '/../config/database.php';
 
-// Database Connection
-$db = Database::getInstance()->getConnection();
+// Build container
+$builder = new ContainerBuilder();
+
+$builder->addDefinitions([
+    DatabaseInterface::class => DI\factory(function () use ($dbConfig) {
+        $default = $dbConfig['default'];
+        $connection = $dbConfig['connections'][$default];
+
+        return match ($default) {
+            'mysql'  => new MySQLDriver($connection),
+            'sqlite' => new SQLiteDriver($connection),
+            default  => throw new RuntimeException('Invalid DB driver'),
+        };
+    }),
+
+    Environment::class => DI\factory(function () {
+        $loader = new FilesystemLoader(__DIR__ . '/../templates');
+        $twig = new Environment($loader, ['debug' => true]);
+        $twig->addGlobal('session', $_SESSION);
+        return $twig;
+    }),
+]);
+
+$container = $builder->build();
+
+// // Basic Twig Setup (Global-ish)
+// $loader = new FilesystemLoader(__DIR__ . '/../templates');
+// $twig = new Environment($loader, ['debug' => true]);
+// $twig->addGlobal('session', $_SESSION);
 
 // Basic Routing (Switch Statement)
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Simple helper for redirection
-function redirect($url)
-{
-    header("Location: $url");
-    exit;
-}
-
 // Router
 switch ($uri) {
     case '/':
-        echo $twig->render('layouts/base.html.twig', ['content' => "<h1>Welcome</h1><a href='/login'>Login</a>"]);
+        echo "hello world";
+        // echo $twig->render('layouts/base.html.twig', ['content' => "<h1>Welcome</h1><a href='/login'>Login</a>"]);
         break;
 
     case '/login':
-        require_once __DIR__ . '/../src/Controllers/AuthController.php';
-        $auth = new \SellNow\Controllers\AuthController($twig, $db);
+        $auth = $container->get(AuthController::class);
+
+        // require_once __DIR__ . '/../src/Controllers/AuthController.php';
+        // $auth = new \SellNow\Controllers\AuthController($twig, $db);
         if ($method === 'POST')
             $auth->login();
         else
