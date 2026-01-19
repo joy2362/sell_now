@@ -2,16 +2,15 @@
 
 namespace SellNow\Controllers;
 
+use SellNow\Interface\DatabaseInterface;
+use Twig\Environment;
+
 class ProductController
 {
-    private $twig;
-    private $db;
-
-    public function __construct($twig, $db)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-    }
+    public function __construct(
+        private Environment $twig,
+        private DatabaseInterface $db
+    ) {}
 
     public function create()
     {
