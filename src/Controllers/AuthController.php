@@ -2,14 +2,16 @@
 
 namespace SellNow\Controllers;
 
-use SellNow\Interface\DatabaseInterface;
+use Exception;
+use SellNow\DTO\Auth\{LoginDTO, RegistrationDTO};
+use SellNow\Services\AuthService;
 use Twig\Environment;
 
 class AuthController
 {
     public function __construct(
         private Environment $twig,
-        private DatabaseInterface $db
+        private AuthService $authService
     ) {}
 
     public function loginForm()
@@ -23,22 +25,17 @@ class AuthController
 
     public function login()
     {
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
+        try {
+            $dto = LoginDTO::fromArray($_POST);
 
-        // Raw SQL, no Model
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $user = $this->authService->login($dto);
 
-        if ($user && $password == $user['password']) {
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            header("Location: /dashboard");
-            exit;
-        } else {
-            header("Location: /login?error=Invalid credentials");
-            exit;
+            $_SESSION['username'] = $user['user_name'];
+
+            redirect("/dashboard");
+        } catch (Exception $e) {
+            redirect("/login?error=" . urlencode($e->getMessage()));
         }
     }
 
@@ -49,25 +46,14 @@ class AuthController
 
     public function register()
     {
-        if (empty($_POST['email']) || empty($_POST['password']))
-            die("Fill all fields");
-
-        // Raw SQL
-        $sql = "INSERT INTO users (email, username, Full_Name, password) VALUES (?, ?, ?, ?)";
-        $stmt = $this->db->prepare($sql);
         try {
-            $stmt->execute([
-                $_POST['email'],
-                $_POST['username'],
-                $_POST['fullname'],
-                $_POST['password']
-            ]);
-        } catch (\Exception $e) {
+            $dto = RegistrationDTO::fromArray($_POST);
+            $this->authService->register($dto);
+
+            redirect("/login?msg=Registered successfully");
+        } catch (Exception $e) {
             die("Error registering: " . $e->getMessage());
         }
-
-        header("Location: /login?msg=Registered successfully");
-        exit;
     }
 
     public function dashboard()
@@ -75,8 +61,12 @@ class AuthController
         if (!isset($_SESSION['user_id']))
             header("Location: /login");
 
-        echo $this->twig->render('dashboard.html.twig', [
-            'username' => $_SESSION['username']
-        ]);
+        echo $this->twig->render('dashboard.html.twig', ['username' => $_SESSION['username']]);
+    }
+
+    public function logout()
+    {
+        session_destroy();
+        redirect('/');
     }
 }

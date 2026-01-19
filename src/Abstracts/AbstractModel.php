@@ -2,6 +2,8 @@
 
 namespace SellNow\Abstracts;
 
+use Exception;
+use PDO;
 use SellNow\Interface\DatabaseInterface;
 
 abstract class AbstractModel
