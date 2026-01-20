@@ -22,5 +22,8 @@
             "name": "JoulesLabs - Tech Team",
             "email": "developer@jouleslabs.com"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpstan/phpstan": "^2.1"
+    }
 }
