@@ -10,7 +10,7 @@ session_start();
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
-$dbConfig = require __DIR__ . '/../config/database.php';
+$dbConfig = require __DIR__ . '/../config/Database.php';
 $routes = require __DIR__ . '/../routes/web.php';
 $middlewareMap = require __DIR__ . '/../config/Middleware.php';
 
