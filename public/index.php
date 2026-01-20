@@ -3,10 +3,6 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use DI\ContainerBuilder;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
-use SellNow\Drivers\{MySQLDriver, SQLiteDriver};
-use SellNow\Interface\DatabaseInterface;
 
 session_start();
 
@@ -19,27 +15,7 @@ $routes = require __DIR__ . '/../routes/web.php';
 
 // Build container
 $builder = new ContainerBuilder();
-
-$builder->addDefinitions([
-    DatabaseInterface::class => DI\factory(function () use ($dbConfig) {
-        $default = $dbConfig['default'];
-        $connection = $dbConfig['connections'][$default];
-
-        return match ($default) {
-            'mysql'  => new MySQLDriver($connection),
-            'sqlite' => new SQLiteDriver($connection),
-            default  => throw new RuntimeException('Invalid DB driver'),
-        };
-    }),
-
-    Environment::class => DI\factory(function () {
-        $loader = new FilesystemLoader(__DIR__ . '/../templates');
-        $twig = new Environment($loader, ['debug' => true]);
-        $twig->addGlobal('session', $_SESSION);
-        return $twig;
-    }),
-]);
-
+$builder->addDefinitions(require __DIR__ . '/../config/Container.php');
 $container = $builder->build();
 
 // Basic Routing (Switch Statement)
