@@ -6,6 +6,9 @@ use Phinx\Migration\AbstractMigration;
 
 final class CreateProductsTable extends AbstractMigration
 {
+    // Define foreign key constant
+    private const USER_FOREIGN_KEY = 'fk_products_user_id';
+
     public function up(): void
     {
         if ($this->hasTable('products')) {
@@ -13,22 +16,34 @@ final class CreateProductsTable extends AbstractMigration
         }
 
         $this->table('products')
-            ->addColumn('name', 'string', ['limit' => 150])
+            ->addColumn('user_id', 'biginteger', ['null' => false, 'signed' => false])
+            ->addColumn('title', 'string', ['limit' => 255])
+            ->addColumn('slug', 'string', ['limit' => 255])
             ->addColumn('description', 'text', ['null' => true])
             ->addColumn('price', 'decimal', ['precision' => 10, 'scale' => 2])
-            ->addColumn('stock', 'integer', ['default' => 0])
+            ->addColumn('image_path', 'string', ['limit' => 255, 'null' => true])
+            ->addColumn('file_path', 'string', ['limit' => 255, 'null' => true])
+            ->addColumn('is_active', 'boolean', ['default' => true])
             ->addColumn('created_at', 'datetime', ['null' => true])
             ->addColumn('updated_at', 'datetime', ['null' => true])
-            ->addIndex(['name'], [
-                'name' => 'idx_products_name'
-            ])
+            ->addIndex(['title'], ['name' => 'idx_products_title'])
+            ->addForeignKey(
+                'user_id',
+                'users',
+                'id',
+                ['delete' => 'CASCADE', 'update' => 'NO_ACTION', 'constraint' => self::USER_FOREIGN_KEY]
+            )
             ->create();
     }
 
     public function down(): void
     {
         if ($this->hasTable('products')) {
-            $this->table('products')->drop()->save();
+            $table = $this->table('products');
+            if ($table->hasForeignKey('user_id')) {
+                $table->dropForeignKey('user_id')->save();
+            }
+            $table->drop()->save();
         }
     }
 }
