@@ -8,6 +8,8 @@ use SellNow\Drivers\{
     SQLiteDriver,
     MySQLDriver
 };
+use SellNow\Middleware\AuthMiddleware;
+use SellNow\Middleware\GuestMiddleware;
 use Twig\Loader\FilesystemLoader;
 use SellNow\Payments\PaymentManager;
 use SellNow\Services\CheckoutService;
@@ -39,4 +41,6 @@ return [
         $twig->addGlobal('session', $_SESSION);
         return $twig;
     }),
+    AuthMiddleware::class => DI\create(),
+    GuestMiddleware::class => DI\create(),
 ];

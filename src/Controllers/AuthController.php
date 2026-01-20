@@ -16,10 +16,6 @@ class AuthController
 
     public function loginForm()
     {
-        if (isset($_SESSION['user_id'])) {
-            header("Location: /dashboard");
-            exit;
-        }
         echo $this->twig->render('auth/login.html.twig');
     }
 
@@ -58,9 +54,6 @@ class AuthController
 
     public function dashboard()
     {
-        if (!isset($_SESSION['user_id']))
-            header("Location: /login");
-
         echo $this->twig->render('dashboard.html.twig', ['username' => $_SESSION['username']]);
     }
 

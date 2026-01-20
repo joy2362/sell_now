@@ -3,9 +3,6 @@
 namespace SellNow\Controllers;
 
 use Exception;
-use SellNow\Interface\DatabaseInterface;
-use SellNow\Models\Product;
-use SellNow\Models\User;
 use SellNow\Services\PublicService;
 use Twig\Environment;
 
