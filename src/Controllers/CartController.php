@@ -2,23 +2,20 @@
 
 namespace SellNow\Controllers;
 
-use SellNow\Interface\DatabaseInterface;
+use SellNow\Services\CartService;
 use Twig\Environment;
 
 class CartController
 {
     public function __construct(
         private Environment $twig,
-        private DatabaseInterface $db
+        private CartService $cartService
     ) {}
 
-    public function index()
+    public function index(): void
     {
-        $cart = $_SESSION['cart'] ?? [];
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
+        $cart = $this->cartService->getCart();
+        $total = $this->cartService->getTotal();
 
         echo $this->twig->render('cart/index.html.twig', [
             'cart' => $cart,
@@ -26,37 +23,33 @@ class CartController
         ]);
     }
 
-    public function add()
+    public function add(): void
     {
-        $id = $_POST['product_id'];
-        $quantity = $_POST['quantity'];
+        $productId = (int) ($_POST['product_id'] ?? 0);
+        $quantity = (int) ($_POST['quantity'] ?? 1);
 
-        // Raw DB call
-        $stmt = $this->db->prepare("SELECT * FROM products WHERE product_id = ?");
-        $stmt->execute([$id]);
-        $product = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if (!$product) {
-            echo json_encode(['status' => 'error']);
+        if ($productId <= 0) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid product'
+            ]);
             exit;
         }
 
-        $_SESSION['cart'][] = [
-            'product_id' => $product['product_id'],
-            'title' => $product['title'],
-            'price' => $product['price'],
-            'quantity' => $quantity
-        ];
+        $result = $this->cartService->addProduct($productId, $quantity);
 
         header('Content-Type: application/json');
-        echo json_encode(['status' => 'success', 'count' => count($_SESSION['cart'])]);
+        echo json_encode([
+            'success' => true,
+            'cart' => $result
+        ]);
         exit;
     }
 
-    public function clear()
+    public function clear(): void
     {
-        unset($_SESSION['cart']);
-        header("Location: /cart");
-        exit;
+        $this->cartService->clear();
+        redirect("/cart");
     }
 }

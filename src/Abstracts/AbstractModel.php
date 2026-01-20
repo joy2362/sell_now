@@ -35,6 +35,22 @@ abstract class AbstractModel
         return $result ?: null;
     }
 
+    // Find row by where query
+    public function findWhere(array $conditions): ?array
+    {
+        $fields = implode(" AND ", array_map(fn($key) => "$key = :$key", array_keys($conditions)));
+
+        $stmt = $this->db->getConnection()->prepare("SELECT * FROM {$this->table} WHERE $fields");
+
+        foreach ($conditions as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
     // Insert row
     public function create(array $data): bool
     {

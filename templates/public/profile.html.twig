@@ -22,7 +22,7 @@
                 <h5 class="card-title">{{ product.title }}</h5>
                 <p class="card-text">${{ product.price }}</p>
                 <button class="btn btn-success add-to-cart" 
-                        data-id="{{ product.product_id }}" 
+                        data-id="{{ product.id }}" 
                         data-title="{{ product.title }}"
                         data-price="{{ product.price }}">
                     Add to Cart
@@ -39,23 +39,36 @@
 
 {% block scripts %}
 <script>
-    // jQuery for Add to Cart intentionally mixed in template
-    $(document).ready(function() {
-        $('.add-to-cart').click(function() {
-            var btn = $(this);
-            var id = btn.data('id');
-            // Imperfection: No AJAX endpoint properly defined yet, will implement next
-            $.post('/cart/add', {
-                product_id: id,
+$(document).ready(function () {
+    $('.add-to-cart').on('click', function () {
+        const btn = $(this);
+        const productId = btn.data('id');
+
+        btn.prop('disabled', true).text('Adding...');
+
+        $.ajax({
+            url: '/cart/add',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                product_id: productId,
                 quantity: 1
-            }, function(response) {
-                alert("Added to cart!");
-                // refresh page is ugly but works
-                location.reload();
-            }).fail(function() {
-                alert("Failed to add to cart"); 
-            });
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#cart-count').text(response.cart_count);
+                    btn.text('Added').removeClass('btn-success').addClass('btn-secondary');
+                } else {
+                    alert(response.message || 'Failed to add to cart');
+                    btn.prop('disabled', false).text('Add to Cart');
+                }
+            },
+            error: function () {
+                alert('Something went wrong. Please try again.');
+                btn.prop('disabled', false).text('Add to Cart');
+            }
         });
     });
+});
 </script>
 {% endblock %}
