@@ -103,15 +103,16 @@ Key principles:
 ```
 sell_now/
 ├── public/           → HTTP entry point
+├── routes/           → Routes 
 ├── src/
 │   ├── Controllers/  → Thin request orchestration
 │   ├── Services/     → Business logic
-│   ├── Repositories/ → Data persistence
+│   ├── Abstract/     → Abstract classes
 │   ├── Domain/       → Core business rules & entities
-│   ├── Security/     → Auth, hashing, guards
+│   ├── Middleware/   → Middleware for each request 
+│   ├── Helpers/      → Reuseable functions
 │   ├── Drivers/      → Infrastructure (DB, external IO)
-│   ├── Contracts/    → Interfaces for replaceable components
-│   └── Http/         → Request/Response abstractions
+│   ├── Interface/    → Interfaces for replaceable components
 ├── config/           → Environment & app configuration
 ├── templates/        → Twig views
 ├── vendor/           → Composer-managed dependencies
